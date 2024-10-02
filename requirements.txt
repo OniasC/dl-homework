@@ -1,3 +1,8 @@
-numpy==1.24.4
+numpy==1.23.5
 scipy==1.10.1
 d2l
+torch==2.1.0
+torchaudio==2.1.0
+torchvision==0.16.0
+pandas==2.0.3
+scipy==1.10.1
