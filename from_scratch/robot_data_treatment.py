@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy
 from random import shuffle
+import matplotlib.pyplot as plt
 
 def globalSpeedPostProcessingGet(posList, timestampList):
     speeds = []
@@ -85,3 +86,17 @@ def createTestTrainSets(x, y, N, trainRatio = 0.6, valRatio = 0.2, testRatio = 0
     return trainTuple, valTuple, testTuple
 
 #trainTuple, valTuple, testTuple = createTestTrainSets(x0, y0, 10)
+
+def dataPlotMulti(dataXList, dataYlist, plotTitle):
+    # Plotting the data
+    plt.figure(figsize=(10, 6))
+    for iter in range(len(dataXList)):
+        dataY = dataYlist[iter]
+        dataX = dataXList[iter]
+        plt.plot(dataX, dataY, label=dataY.name)#, marker='o', linestyle='-')
+    plt.title(plotTitle)
+    plt.xlabel("x coordinate (m)")
+    plt.ylabel("y coordinate (m)")
+
+    plt.grid(True)
+    plt.show()
