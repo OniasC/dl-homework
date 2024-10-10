@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy
 from random import shuffle
+import random
 import matplotlib.pyplot as plt
 
 def globalSpeedPostProcessingGet(posList, timestampList):
@@ -69,8 +70,8 @@ def createTestTrainSets(x, y, N, trainRatio = 0.6, valRatio = 0.2, testRatio = 0
     #print(int(len(x)/N))
     #print(trainSize, valSize, testSize)
     for iter in range(int(len(x)/N)):
-        x_list.append(x[iter:iter+N])
-        y_list.append(y[iter:iter+N])
+        x_list.append(x[iter*N:(iter+1)*N])
+        y_list.append(y[iter*N:(iter+1)*N])
     shuffle(x_list)
     shuffle(y_list)
 
@@ -100,3 +101,56 @@ def dataPlotMulti(dataXList, dataYlist, plotTitle):
 
     plt.grid(True)
     plt.show()
+
+def sequenceChunksBreak(inputs, targets, chunkLength=100):
+    ''' breaks the two arrays inputs and targets into chunks of length chunkLength'''
+    if (len(inputs)!=len(targets)):
+        print("error! diff size lists")
+    totalSize = len(inputs)
+    numOfChunks = int(totalSize/chunkLength)
+    inputChunks = []
+    targetChunks = []
+    for iter in range(numOfChunks):
+        #print(print("inputs[iter:iter+chunkLength] ",iter,  inputs[iter:iter+chunkLength]))
+        inputChunks.append(inputs[iter*chunkLength:(iter+1)*chunkLength])
+        targetChunks.append(targets[iter*chunkLength:(iter+1)*chunkLength])
+    return inputChunks, targetChunks, inputs, targets
+
+
+def dataGet_v2(paths, sequenceLength, trainRatio=0.8, valRatio=0.1, testRatio=0.1):
+    inputs = []
+    targets = []
+    sequences = []
+    goal_size = 0
+    test_ins = []
+    test_outs = []
+
+    for path in paths:
+        data, x0, y0 = dataGet(path)
+
+        # break here into chunks of sequenceLength
+        inputChunks, targetChunks, x, y = sequenceChunksBreak(x0,y0,chunkLength=sequenceLength)
+        inputs = inputs + inputChunks
+        targets = targets + targetChunks
+        test_ins += x
+        test_outs += y
+        goal_size += int(len(x0)/sequenceLength)
+
+
+    inputs = random.sample(inputs, len(inputs))
+    targets = random.sample(targets, len(targets))
+
+    trainSize = int(trainRatio*int(len(inputs)))
+    valSize   = int(valRatio*int(len(inputs)))
+    testSize  = int(testRatio*int(len(inputs)))
+
+    train_input = np.array(inputs[0:trainSize])
+    train_target = np.array(targets[0:trainSize])
+
+    cv_input = np.array(inputs[trainSize:trainSize+valSize])
+    cv_target = np.array(targets[trainSize:trainSize+valSize])
+
+    test_input = np.array(inputs[trainSize+valSize:])
+    test_target = np.array(targets[trainSize+valSize:])
+
+    return train_input, train_target, data, cv_input, cv_target
